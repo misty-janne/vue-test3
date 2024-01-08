@@ -12,23 +12,80 @@ const router = Router();
 
 // router
 
-router.get('/findid/:nickname/:cellphone', async (req, res) => {
-  // find the user's id by name and cellphone
-  try {
-    const doc = await UserModel.findOne({
-      nickname: req.params.nickname,
-      cellphone: req.params.cellphone,
+router.get(
+  '/findbyid/:id',
+  async (req, res) => {
+    // try {
+    const docs = await UserModel.findOne({
+      username: req.user._id,
+      _id: req.params.id,
     })
       .lean()
       .exec();
-    if (!doc) {
-      return res.status(400).json({ message: 'The data is not found' });
-    }
     res.status(200).json({ ...doc });
+  },
+  // catch (error) {
+  //   console.error(error);
+  // }
+  // }
+);
+
+router.post('/findid', (req, res) => {
+  // find the user's id by name and cellphone
+  try {
+    const result = UserModel.find({
+      nickname: req.body.nickname,
+      cellphone: req.body.cellphone,
+    }).exec();
+    console.log(result);
+    if (result) {
+      res.status(200).json({
+        success: true,
+        user: result,
+        message: 'Login Success',
+        token: token,
+      });
+    }
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: 'sth wrong', error });
   }
+});
+
+router.post('/findpw', (req, res) => {
+  // find the user's pw by name and cellphone
+  UserModel.find({
+    username: req.body.username,
+    cellphone: req.body.cellphone,
+  }).then(user => {
+    if (!user) {
+      res.status(401).send('Authentication failed. User not found.');
+    }
+    bcrypt.compare(req.body.password, user.password, (error, result) => {
+      if (error) {
+        res.status(500).send('Internal Server Error');
+      }
+      if (result) {
+        // create token with user info
+        const token = newToken(user);
+
+        // current logged-in user
+        const loggedInUser = {
+          username: user.username,
+          nickname: user.nickname,
+        };
+
+        // return the information including token as JSON
+        res.status(200).json({
+          success: true,
+          user: loggedInUser,
+          message: 'Login Success',
+          token: token,
+        });
+      } else {
+        res.status(401).json('Authentication failed. Wrong password.');
+      }
+    });
+  });
 });
 
 router.post('/login', (req, res) => {
@@ -104,5 +161,4 @@ router.post('/signup', (req, res) => {
 });
 
 // TODO: Logout 구현 필요
-
 export default router;
