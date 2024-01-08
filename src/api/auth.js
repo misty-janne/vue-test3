@@ -13,16 +13,15 @@ const router = Router();
 // router
 
 router.get(
-  '/findbyid/:id',
+  '/findbyid/:username',
   async (req, res) => {
     // try {
     const docs = await UserModel.findOne({
-      username: req.user._id,
-      _id: req.params.id,
+      username: req.params.username,
     })
       .lean()
       .exec();
-    res.status(200).json({ ...doc });
+    res.status(200).json({ ...docs });
   },
   // catch (error) {
   //   console.error(error);

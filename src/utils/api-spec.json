@@ -9,7 +9,7 @@
     "application/json"
   ],
   "paths": {
-    "/findbyid/{_id}": {
+    "/findbyid/{username}": {
       "get": {
         "tags": [
           "/findbyid"
@@ -17,12 +17,18 @@
         "description": "사용자 정보를 가져오는 API입니다",
         "parameters": [
           {
-            "name": "_id",
+            "name": "username",
             "in": "path",
             "description": "사용자 아이디",
             "required": true,
             "type": "string"
           }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
         ],
         "responses": {
           "200": {
